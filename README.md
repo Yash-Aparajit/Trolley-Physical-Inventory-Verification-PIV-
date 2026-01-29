@@ -144,3 +144,21 @@ Paste the project code.
 **Status Column**
 ```excel
 =ARRAYFORMULA(IF(A7:A="","", "Not Scanned"))
+
+---
+
+# ✅ .gitignore 
+
+Since this is Google Apps Script + HTML, there’s usually no build output.  
+
+```gitignore
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor folders
+.vscode/
+.idea/
+
+# Logs
+*.log
