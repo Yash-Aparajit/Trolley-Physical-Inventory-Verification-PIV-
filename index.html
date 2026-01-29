@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Trolley PIV - QR Scan</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f6f7fb;
+        margin: 0;
+        padding: 16px;
+      }
+
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      }
+
+      h2 {
+        margin: 0 0 12px 0;
+        font-size: 20px;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        color: #333;
+      }
+
+      input, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+        background: #fff;
+      }
+
+      textarea {
+        min-height: 70px;
+        resize: none;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .btn-scan {
+        background: #111827;
+        color: white;
+      }
+
+      .btn-save {
+        background: #2563eb;
+        color: white;
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .status {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        display: none;
+        white-space: pre-line;
+      }
+
+      .status.ok {
+        background: #dcfce7;
+        color: #166534;
+        display: block;
+      }
+
+      .status.err {
+        background: #fee2e2;
+        color: #991b1b;
+        display: block;
+      }
+
+      .small {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <h2>✅ Trolley PIV (QR Scan Verification)</h2>
+
+      <label>Trolley ID (Scan or Type)</label>
+      <input id="trolleyId" type="text" placeholder="Scan QR or type trolley ID" />
+
+      <label>Remark (Optional)</label>
+      <textarea id="remark" placeholder="Optional remark..."></textarea>
+
+      <label>Scanned By</label>
+      <input id="scannedBy" type="text" placeholder="Enter your name / ID" />
+
+      <div class="row">
+        <button class="btn btn-scan" onclick="scanQR()">📷 Scan QR</button>
+        <button class="btn btn-save" id="saveBtn" onclick="saveScan()">✅ Save</button>
+      </div>
+
+      <div id="statusBox" class="status"></div>
+
+      <div class="small">
+        Rules:
+        <br>1) Empty ID not allowed
+        <br>2) ID must exist in MASTER
+        <br>3) Duplicate scans rejected
+      </div>
+
+      <div class="footer">Built for fast trolley verification ✅</div>
+    </div>
+
+    <script>
+      function showStatus(msg, ok) {
+        const box = document.getElementById("statusBox");
+        box.className = "status " + (ok ? "ok" : "err");
+        box.innerText = msg;
+      }
+
+      function beepAndVibrate() {
+         Vibrate (mobile)
+        if (navigator.vibrate) navigator.vibrate(200);
+
+        
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+
+          oscillator.connect(gain);
+          gain.connect(ctx.destination);
+
+          oscillator.start();
+          oscillator.stop(ctx.currentTime + 0.12);
+        } catch (e) {
+           ignore
+        }
+      }
+
+       SIMPLE QR SCAN:
+       Uses "BarcodeDetector" if available (best for Android Chrome).
+       If not supported, user can type manually.
+      async function scanQR() {
+        const trolleyInput = document.getElementById("trolleyId");
+
+        if (!("BarcodeDetector" in window)) {
+          showStatus("❌ QR Scan not supported on this phone/browser.\nType the trolley ID manually.", false);
+          return;
+        }
+
+        try {
+          const detector = new BarcodeDetector({ formats: ["qr_code"] });
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }
+          });
+
+           Create temporary video element
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          video.setAttribute("playsinline", true);
+          await video.play();
+
+           Small scanning loop (2 seconds max)
+          const start = Date.now();
+          let found = false;
+
+          while (Date.now() - start < 2000) {
+            const barcodes = await detector.detect(video);
+            if (barcodes.length > 0) {
+              const rawValue = barcodes[0].rawValue || "";
+              trolleyInput.value = rawValue.trim(); 
+              found = true;
+              break;
+            }
+            await new Promise(r => setTimeout(r, 120));
+          }
+
+           Stop camera
+          stream.getTracks().forEach(t => t.stop());
+
+          if (found) {
+            beepAndVibrate();
+            showStatus("✅ QR scanned and filled into Trolley ID.", true);
+          } else {
+            showStatus("⚠️ Could not detect QR.\nTry again or type manually.", false);
+          }
+
+        } catch (err) {
+          showStatus("❌ Camera/QR Error: " + err.message, false);
+        }
+      }
+
+      function saveScan() {
+        const trolleyId = (document.getElementById("trolleyId").value || "").trim();
+        const remark = (document.getElementById("remark").value || "").trim();
+        const scannedBy = (document.getElementById("scannedBy").value || "").trim();
+
+        const saveBtn = document.getElementById("saveBtn");
+        saveBtn.disabled = true;
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res.ok) {
+              beepAndVibrate();
+              showStatus(res.message + "\nID: " + res.trolleyId + "\nTime: " + res.date + " " + res.time, true);
+
+               Clear for next scan
+              document.getElementById("trolleyId").value = "";
+              document.getElementById("remark").value = "";
+               scannedBy stays (same person scanning many)
+
+              document.getElementById("trolleyId").focus();
+            } else {
+              showStatus(res.message, false);
+            }
+            saveBtn.disabled = false;
+          })
+          .withFailureHandler((err) => {
+            showStatus("❌ Server Error: " + err.message, false);
+            saveBtn.disabled = false;
+          })
+          .saveScan({ trolleyId, remark, scannedBy });
+      }
+    </script>
+  </body>
+</html>
