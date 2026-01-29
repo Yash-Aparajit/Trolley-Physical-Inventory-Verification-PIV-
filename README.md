@@ -126,3 +126,21 @@ Paste the project code.
 **Total Expected**
 ```excel
 =COUNTA(MASTER!A2:A)
+
+**Total Scanned**
+```excel
+=COUNTA(SCANNED!C2:C)
+
+**Total Missing**
+```excel
+=B2-B3
+
+### ✅ Missing Trolleys List 
+**List (ID + Name)**
+```excel
+=FILTER(MASTER!A2:B, ISNA(MATCH(MASTER!A2:A, SCANNED!C2:C, 0)))
+
+
+**Status Column**
+```excel
+=ARRAYFORMULA(IF(A7:A="","", "Not Scanned"))
