@@ -20,7 +20,7 @@ Management gets a live **missing trolley report** automatically.
 - Automatically fills the **Trolley ID**
 - Manual typing supported if camera scan fails
 
-### ✅ Strict Validations (Before Saving)
+### ✅ Strict Validations 
 - **No empty trolley ID**
 - **ID must exist in MASTER list**
 - **Duplicate scans rejected** (same trolley cannot be scanned twice)
@@ -40,7 +40,7 @@ REPORT sheet updates automatically using formulas to show:
 - Total Missing
 - Missing trolley list (ID + Name + Not Scanned)
 
-### 🔎 Quick Search in REPORT (Optional)
+### 🔎 Quick Search in REPORT 
 A search section lets management type a trolley ID and instantly see:
 - Scanned / Not Scanned status
 - Date / Time scanned
@@ -63,23 +63,23 @@ Uses **LockService** to prevent duplicate entries during simultaneous usage.
 Ground truth list (uploaded from Excel).  
 **Never modified during scanning.**
 
-| Column | Name |
-|--------|------|
-| A | Trolley_ID |
-| B | Trolley_Name |
+| Column |     Name     |
+|--------|--------------|
+|    A   | Trolley_ID   |
+|    B   | Trolley_Name |
 
 ---
 
 ### ✅ Sheet 2: `SCANNED`
 Stores accepted QR verification scans.
 
-| Column | Name |
-|--------|------|
-| A | Date |
-| B | Time |
-| C | Trolley_ID |
-| D | Remark |
-| E | Scanned_By |
+| Column |    Name    |
+|--------|------------|
+|    A   | Date       |
+|    B   | Time       |
+|    C   | Trolley_ID |
+|    D   | Remark     |
+|    E   | Scanned_By |
 
 ---
 
@@ -101,8 +101,7 @@ Create a new spreadsheet and add 3 sheets:
 Add headers exactly as defined above.
 
 ### 2) Open Apps Script
-Go to:
-**Extensions → Apps Script**
+Go to: **Extensions → Apps Script**
 
 Create these files:
 - `Code.gs`
@@ -120,45 +119,50 @@ Paste the project code.
 
 ---
 
-## 📌 REPORT Formulas (Copy Paste)
+## 📌 REPORT Formulas 
 
-### ✅ Summary
-**Total Expected**
-```excel
-=COUNTA(MASTER!A2:A)
+REPORT SHEET FORMULAS (COPY-PASTE)
 
-**Total Scanned**
-```excel
-=COUNTA(SCANNED!C2:C)
+1) SUMMARY
+Put these labels in REPORT sheet:
 
-**Total Missing**
-```excel
-=B2-B3
+A2 = Total Expected
+B2 = =COUNTA(MASTER!A2:A)
 
-### ✅ Missing Trolleys List 
-**List (ID + Name)**
-```excel
-=FILTER(MASTER!A2:B, ISNA(MATCH(MASTER!A2:A, SCANNED!C2:C, 0)))
+A3 = Total Scanned
+B3 = =COUNTA(SCANNED!C2:C)
+
+A4 = Total Missing
+B4 = =B2-B3
 
 
-**Status Column**
-```excel
-=ARRAYFORMULA(IF(A7:A="","", "Not Scanned"))
+2) MISSING TROLLEYS LIST
 
----
+A6 = Trolley_ID
+B6 = Trolley_Name
+C6 = Status
 
-# ✅ .gitignore 
+A7 = =FILTER(MASTER!A2:B, ISNA(MATCH(MASTER!A2:A, SCANNED!C2:C, 0)))
 
-Since this is Google Apps Script + HTML, there’s usually no build output.  
+C7 = =ARRAYFORMULA(IF(A7:A="","", "Not Scanned"))
 
-```gitignore
-# OS junk
-.DS_Store
-Thumbs.db
 
-# Editor folders
-.vscode/
-.idea/
+(Optional) SEARCH BOX (Management Quick Check)
 
-# Logs
-*.log
+E2 = Enter Trolley ID
+F2 = (Type any trolley ID here manually)
+
+E3 = Status
+F3 = =IF(F2="","", IF(ISNUMBER(MATCH(F2, SCANNED!C:C, 0)), "✅ Scanned", "❌ Not Scanned"))
+
+E4 = Scanned Date
+F4 = =IF(F2="","", IFERROR(INDEX(SCANNED!A:A, MATCH(F2, SCANNED!C:C, 0)), ""))
+
+E5 = Scanned Time
+F5 = =IF(F2="","", IFERROR(INDEX(SCANNED!B:B, MATCH(F2, SCANNED!C:C, 0)), ""))
+
+E6 = Remark
+F6 = =IF(F2="","", IFERROR(INDEX(SCANNED!D:D, MATCH(F2, SCANNED!C:C, 0)), ""))
+
+E7 = Scanned By
+F7 = =IF(F2="","", IFERROR(INDEX(SCANNED!E:E, MATCH(F2, SCANNED!C:C, 0)), ""))
