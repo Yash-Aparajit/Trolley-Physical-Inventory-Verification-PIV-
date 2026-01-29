@@ -13,7 +13,6 @@ function doGet() {
     .setTitle("Trolley PIV - QR Scan");
 }
 
-// Clean trolley id using trim()
 function cleanId(id) {
   return String(id || "").trim();
 }
@@ -67,24 +66,20 @@ function saveScan(payload) {
     const remark = String(payload?.remark || "").trim();
     const scannedBy = String(payload?.scannedBy || "").trim();
 
-    // Rule 1: No empty ID
     if (!trolleyId) {
       return { ok: false, message: "❌ Trolley ID cannot be empty." };
     }
 
-    // Rule 2: ID must exist in MASTER
     const masterMap = getMasterMap_();
     if (!masterMap[trolleyId]) {
       return { ok: false, message: "❌ Invalid ID. Not found in MASTER." };
     }
 
-    // Rule 3: No duplicates
     const scannedMap = getScannedMap_();
     if (scannedMap[trolleyId]) {
       return { ok: false, message: "⚠️ Duplicate Scan. Already scanned." };
     }
 
-    // Save
     const now = new Date();
     const dateStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM/yyyy");
     const timeStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "HH:mm");
