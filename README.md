@@ -119,50 +119,26 @@ Paste the project code.
 
 ---
 
-## 📌 REPORT Formulas 
+## 📌 REPORT Formulas (Copy Paste)
 
-REPORT SHEET FORMULAS (COPY-PASTE)
+```excel
+SUMMARY (REPORT Sheet)
 
-1) SUMMARY
-Put these labels in REPORT sheet:
-
-A2 = Total Expected
-B2 = =COUNTA(MASTER!A2:A)
-
-A3 = Total Scanned
-B3 = =COUNTA(SCANNED!C2:C)
-
-A4 = Total Missing
-B4 = =B2-B3
+B2 =COUNTA(MASTER!A2:A)
+B3 =COUNTA(SCANNED!C2:C)
+B4 =B2-B3
 
 
-2) MISSING TROLLEYS LIST
+MISSING LIST (REPORT Sheet)
 
-A6 = Trolley_ID
-B6 = Trolley_Name
-C6 = Status
-
-A7 = =FILTER(MASTER!A2:B, ISNA(MATCH(MASTER!A2:A, SCANNED!C2:C, 0)))
-
-C7 = =ARRAYFORMULA(IF(A7:A="","", "Not Scanned"))
+A7 =FILTER(MASTER!A2:B, ISNA(MATCH(MASTER!A2:A, SCANNED!C2:C, 0)))
+C7 =ARRAYFORMULA(IF(A7:A="","", "Not Scanned"))
 
 
-(Optional) SEARCH BOX (Management Quick Check)
+SEARCH TROLLEY STATUS (OPTIONAL)
 
-E2 = Enter Trolley ID
-F2 = (Type any trolley ID here manually)
-
-E3 = Status
-F3 = =IF(F2="","", IF(ISNUMBER(MATCH(F2, SCANNED!C:C, 0)), "✅ Scanned", "❌ Not Scanned"))
-
-E4 = Scanned Date
-F4 = =IF(F2="","", IFERROR(INDEX(SCANNED!A:A, MATCH(F2, SCANNED!C:C, 0)), ""))
-
-E5 = Scanned Time
-F5 = =IF(F2="","", IFERROR(INDEX(SCANNED!B:B, MATCH(F2, SCANNED!C:C, 0)), ""))
-
-E6 = Remark
-F6 = =IF(F2="","", IFERROR(INDEX(SCANNED!D:D, MATCH(F2, SCANNED!C:C, 0)), ""))
-
-E7 = Scanned By
-F7 = =IF(F2="","", IFERROR(INDEX(SCANNED!E:E, MATCH(F2, SCANNED!C:C, 0)), ""))
+F3 =IF(F2="","", IF(ISNUMBER(MATCH(F2, SCANNED!C:C, 0)), "✅ Scanned", "❌ Not Scanned"))
+F4 =IF(F2="","", IFERROR(INDEX(SCANNED!A:A, MATCH(F2, SCANNED!C:C, 0)), ""))
+F5 =IF(F2="","", IFERROR(INDEX(SCANNED!B:B, MATCH(F2, SCANNED!C:C, 0)), ""))
+F6 =IF(F2="","", IFERROR(INDEX(SCANNED!D:D, MATCH(F2, SCANNED!C:C, 0)), ""))
+F7 =IF(F2="","", IFERROR(INDEX(SCANNED!E:E, MATCH(F2, SCANNED!C:C, 0)), ""))
