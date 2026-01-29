@@ -7,84 +7,183 @@
   <style>
     body{
       font-family: Arial;
-      padding: 22px;
-      font-size: 20px;
-      max-width: 620px;
+      padding: 20px;
+      max-width: 680px;
       margin: auto;
-      background:#f6f7fb;
+      background: #f4f6fb;
+      color: #111827;
     }
-    h2{margin:0 0 10px 0}
-    input,button,textarea{
+
+    .card{
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+    }
+
+    h2{
+      margin: 0;
       font-size: 20px;
-      padding: 14px;
-      width: 100%;
-      margin-top: 14px;
-      border-radius: 10px;
-      border:1px solid #ddd;
-      box-sizing:border-box;
     }
-    textarea{min-height:70px;resize:none}
+
+    .sub{
+      margin-top: 6px;
+      color: #6b7280;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    label{
+      display:block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #374151;
+      font-weight: 700;
+    }
+
+    input, textarea, button{
+      width: 100%;
+      font-size: 18px;
+      padding: 14px;
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    textarea{
+      min-height: 70px;
+      resize: none;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top: 14px;
+    }
+
+    .btn{
+      border: none;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .btn:active{
+      transform: scale(0.98);
+    }
 
     .btnScan{
-      background:#111827;color:white;border:none;font-weight:700;
+      background: #111827;
+      color: white;
     }
+
+    .btnTorch{
+      background: #374151;
+      color: white;
+    }
+
     .btnSave{
-      background:#2563eb;color:white;border:none;font-weight:700;
+      background: #2563eb;
+      color: white;
+      margin-top: 14px;
+    }
+
+    .btn:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     video{
-      width:100%;
-      margin-top:14px;
-      border-radius:12px;
-      display:none;
-      background:black;
-      min-height:260px;
+      width: 100%;
+      margin-top: 14px;
+      border-radius: 14px;
+      display: none;
+      background: black;
+      min-height: 260px;
     }
 
     #msg{
-      margin-top:14px;
-      padding:12px;
-      border-radius:10px;
-      display:none;
-      font-size:16px;
-      white-space:pre-line;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      display: none;
+      font-size: 15px;
+      white-space: pre-line;
     }
-    .ok{background:#dcfce7;color:#166534;display:block}
-    .err{background:#fee2e2;color:#991b1b;display:block}
 
-    .small{
-      font-size:12px;color:#6b7280;margin-top:10px;line-height:1.4;
+    .ok{
+      background: #dcfce7;
+      color: #166534;
+      display: block;
+    }
+
+    .err{
+      background: #fee2e2;
+      color: #991b1b;
+      display: block;
+    }
+
+    .rules{
+      margin-top: 12px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .pill{
+      display:inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-size: 12px;
+      font-weight: 800;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
-  <h2>✅ Trolley PIV - QR Scan Verification</h2>
+  <div class="card">
+    <h2>✅ Trolley PIV - QR Verification</h2>
+    <div class="sub">
+      Scan trolley QR → Save → Report updates automatically.
+      <div class="pill">No duplicates allowed</div>
+    </div>
 
-  <button class="btnScan" onclick="startScan()">📷 Start QR Scan</button>
-  <video id="cam"></video>
+    <div class="row">
+      <button class="btn btnScan" onclick="startScan()">📷 Start Scan</button>
+      <button class="btn btnTorch" onclick="toggleTorch()">🔦 Torch</button>
+    </div>
 
-  <input id="trolleyId" placeholder="Scan QR or type Trolley ID manually">
+    <video id="cam"></video>
 
-  <textarea id="remark" placeholder="Remark (optional)"></textarea>
+    <label>Trolley ID</label>
+    <input id="trolleyId" placeholder="Scan QR or type manually">
 
-  <input id="scannedBy" placeholder="Scanned By (name / ID)">
+    <label>Remark (Optional)</label>
+    <textarea id="remark" placeholder="Optional remark..."></textarea>
 
-  <button id="saveBtn" class="btnSave" onclick="save()">✅ Save</button>
+    <label>Scanned By</label>
+    <input id="scannedBy" placeholder="Your name / ID">
 
-  <div id="msg"></div>
+    <button id="saveBtn" class="btn btnSave" onclick="save()">✅ Save Scan</button>
 
-  <div class="small">
-    Rules:
-    <br>1) Empty ID not allowed
-    <br>2) ID must exist in MASTER
-    <br>3) Duplicate scans rejected
+    <div id="msg"></div>
+
+    <div class="rules">
+      Rules:
+      <br>1) Empty ID not allowed
+      <br>2) ID must exist in MASTER
+      <br>3) Duplicate scans rejected
+    </div>
   </div>
 
 <script>
 /******** MESSAGE AUTO HIDE ********/
 let msgTimer = null;
-
 function showMsg(text, ok){
   const box = document.getElementById("msg");
   box.className = ok ? "ok" : "err";
@@ -95,7 +194,7 @@ function showMsg(text, ok){
   msgTimer = setTimeout(() => {
     box.style.display = "none";
     box.innerText = "";
-  }, 5000); 
+  }, 5000);
 }
 
 /******** BEEP + VIBRATE ********/
@@ -103,25 +202,26 @@ function beep(){
   try{
     const ctx=new (window.AudioContext||window.webkitAudioContext)();
     const o=ctx.createOscillator(),g=ctx.createGain();
-    g.gain.value=0.2; o.frequency.value=900;
+    g.gain.value=0.18; o.frequency.value=900;
     o.connect(g); g.connect(ctx.destination);
     o.start(); o.stop(ctx.currentTime+0.18);
   }catch(e){}
 }
-
 function vibrateStrong(){
   if(navigator.vibrate) navigator.vibrate([200,80,200]);
 }
 
-let stream=null;
+/******** CAMERA + TORCH STATE ********/
+let stream = null;
+let videoTrack = null;
+let torchOn = false;
 
 /******** CAMERA START ********/
 async function startScan(){
   showMsg("📷 Opening camera...", true);
 
-  
   if(!("BarcodeDetector" in window)){
-    showMsg("❌ QR scan not supported. Use Chrome and type ID manually.", false);
+    showMsg("❌ QR scan not supported. Use Chrome. Manual entry allowed.", false);
     return;
   }
 
@@ -136,10 +236,13 @@ async function startScan(){
     await v.play();
     v.style.display = "block";
 
+    videoTrack = stream.getVideoTracks()[0];
+    torchOn = false;
+
     const detector = new BarcodeDetector({ formats: ["qr_code"] });
 
     const loop = async () => {
-      if(!stream) return; 
+      if(!stream) return;
 
       let codes = [];
       try{
@@ -149,12 +252,11 @@ async function startScan(){
       }
 
       if(codes.length){
-        const raw = (codes[0].rawValue || "").trim(); 
+        const raw = (codes[0].rawValue || "").trim();
         document.getElementById("trolleyId").value = raw;
 
         beep(); vibrateStrong();
         stopScan();
-
         showMsg("✅ QR scanned successfully.", true);
         return;
       }
@@ -177,12 +279,40 @@ function stopScan(){
     stream.getTracks().forEach(t => t.stop());
     stream = null;
   }
+  videoTrack = null;
+  torchOn = false;
   v.style.display = "none";
+}
+
+/******** TORCH ********/
+async function toggleTorch(){
+  try{
+    if(!videoTrack){
+      showMsg("⚠️ Torch works only when camera is ON.", false);
+      return;
+    }
+
+    const caps = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+    if(!caps.torch){
+      showMsg("❌ Torch not supported on this phone.", false);
+      return;
+    }
+
+    torchOn = !torchOn;
+    await videoTrack.applyConstraints({
+      advanced: [{ torch: torchOn }]
+    });
+
+    showMsg(torchOn ? "🔦 Torch ON" : "🔦 Torch OFF", true);
+
+  }catch(err){
+    showMsg("❌ Torch error: " + err.message, false);
+  }
 }
 
 /******** SAVE ********/
 function save(){
-  const trolleyId = (document.getElementById("trolleyId").value || "").trim(); 
+  const trolleyId = (document.getElementById("trolleyId").value || "").trim();
   const remark = (document.getElementById("remark").value || "").trim();
   const scannedBy = (document.getElementById("scannedBy").value || "").trim();
 
@@ -195,7 +325,6 @@ function save(){
         beep(); vibrateStrong();
         showMsg(res.message + "\nTime: " + res.date + " " + res.time, true);
 
-        
         document.getElementById("trolleyId").value = "";
         document.getElementById("remark").value = "";
         document.getElementById("trolleyId").focus();
