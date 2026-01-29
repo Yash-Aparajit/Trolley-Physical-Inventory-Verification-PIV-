@@ -5,21 +5,19 @@
 const CONFIG = {
   MASTER_SHEET: "MASTER",
   SCANNED_SHEET: "SCANNED",
+  REPORT_SHEET: "REPORT",
 };
 
-// Serve UI
 function doGet() {
   return HtmlService.createHtmlOutputFromFile("index")
-    .setTitle("Trolley PIV - QR Scan")
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+    .setTitle("Trolley PIV - QR Scan");
 }
 
-// Utility: Clean trolley id using trim()
+// Clean trolley id using trim()
 function cleanId(id) {
   return String(id || "").trim();
 }
 
-// Load MASTER IDs into a Set-like object for quick lookup
 function getMasterMap_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName(CONFIG.MASTER_SHEET);
@@ -35,11 +33,9 @@ function getMasterMap_() {
     const id = cleanId(values[i][0]);
     if (id) masterMap[id] = true;
   }
-
   return masterMap;
 }
 
-// Load scanned IDs into map for quick duplicate check
 function getScannedMap_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName(CONFIG.SCANNED_SHEET);
@@ -55,21 +51,18 @@ function getScannedMap_() {
     const id = cleanId(values[i][0]);
     if (id) scannedMap[id] = true;
   }
-
   return scannedMap;
 }
 
-// MAIN SAVE FUNCTION
 function saveScan(payload) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(10000); // 10 seconds max wait
+  lock.waitLock(10000);
 
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const scannedSheet = ss.getSheetByName(CONFIG.SCANNED_SHEET);
     if (!scannedSheet) throw new Error("SCANNED sheet not found");
 
-    // Read + clean
     let trolleyId = cleanId(payload?.trolleyId);
     const remark = String(payload?.remark || "").trim();
     const scannedBy = String(payload?.scannedBy || "").trim();
@@ -79,21 +72,19 @@ function saveScan(payload) {
       return { ok: false, message: "❌ Trolley ID cannot be empty." };
     }
 
-    // Load MASTER + SCANNED maps
-    const masterMap = getMasterMap_();
-
     // Rule 2: ID must exist in MASTER
+    const masterMap = getMasterMap_();
     if (!masterMap[trolleyId]) {
       return { ok: false, message: "❌ Invalid ID. Not found in MASTER." };
     }
 
-    // Rule 3: No duplicate scans
+    // Rule 3: No duplicates
     const scannedMap = getScannedMap_();
     if (scannedMap[trolleyId]) {
-      return { ok: false, message: "⚠️ Duplicate Scan. This trolley is already scanned." };
+      return { ok: false, message: "⚠️ Duplicate Scan. Already scanned." };
     }
 
-    // Save scan
+    // Save
     const now = new Date();
     const dateStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "dd/MM/yyyy");
     const timeStr = Utilities.formatDate(now, Session.getScriptTimeZone(), "HH:mm");
@@ -108,8 +99,8 @@ function saveScan(payload) {
 
     return {
       ok: true,
-      message: "✅ Accepted. Scan saved successfully.",
-      trolleyId: trolleyId,
+      message: `✅ Accepted. Saved: ${trolleyId}`,
+      trolleyId,
       date: dateStr,
       time: timeStr,
     };
